@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <form id="addform">
+        <h1>BOOKING APPOINMENT APP</h1>
+        <label for="name">Name:</label><br>
+        <input type="text" id="name"  required><br>
+    <label for="email">Email id:</label><br>
+    <input type="text" id="email"  required><br>
+    <label for="phonenumber">phone no:</label><br>
+    <input type="number" id="phonenumber" required><br>
+
+    <input type="submit" value="submit"><br>
+    <ul id="users"></ul>
+
+    </form>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.1.2/axios.min.js"></script>
+    <script>
+var Form=document.getElementById('addform')
+var namei=document.getElementById('name');
+var email=document.getElementById('email');
+var phonenumber=document.getElementById('phonenumber');
+var itemlist=document.getElementById('users')
+document.addEventListener("submit",addItem)
+// localStorage.setItem('userexpense','expence')
+// localStorage.setItem('userdescription','description')
+// localStorage.setItem('usercategory','category')
+const config = {
+  headers: {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS"
+  }
+}
+
+function addItem(e){
+    e.preventDefault();
+    
+    if(name.value==='' || email.value==='' || phonenumber.value===''){
+        alert('please enter fields')
+    }
+    else{
+    // console.log(name.value);
+        let Obj={
+            name:namei.value,
+            email:email.value,
+            phonenumber:phonenumber.value
+        }
+    console.log(Obj);
+        axios.post("http://localhost:3000/user/add-user",Obj)
+        .then((response)=>{
+           //console.log(response,'localhost:3000/user/add-user');
+           console.log(response,'line 54');
+            showonscreen(Obj)
+  
+        })
+        .catch((err)=>{
+            document.body.innerHTML=document.body.innerHTML+"<h4>something wrong</h4>"
+            console.log(err)
+        })
+       // let Obj_serialized=JSON.stringify(Obj);
+//localStorage.setItem(Obj.description,Obj_serialized);
+//let Obj_deserialized=JSON.parse(localStorage.getItem("Obj"))
+
+    }
+}
+
+window.addEventListener("DOMContentLoaded",()=>{
+    axios.get("http://localhost:3000/user/get-users",config)
+    .then((response)=>{
+        console.log(response)
+         for(var i=0;i<response.data.allUsers.length;i++){
+            showonscreen(response.data.allUsers[i])
+         }
+    })
+    .catch((error)=>{
+        console.log(error);
+    })
+})
+
+
+function showonscreen(data){
+    var li=document.createElement('li');
+    li.className='item';
+    
+
+    li.appendChild(document.createTextNode(`${data.name}- ${data.email}`));
+
+    var delbtn=document.createElement('button');
+    delbtn.className='delete-btn';
+    delbtn.appendChild(document.createTextNode('Delete'));
+    li.appendChild(delbtn)
+
+    var edibtn=document.createElement('button');
+    edibtn.className='edit-btn';
+    edibtn.appendChild(document.createTextNode('Edit'));
+    li.appendChild(edibtn)
+
+    itemlist.appendChild(li)
+
+
+        document.addEventListener('click',deleteitem);
+
+        function deleteitem(e){
+            if(e.target==delbtn){
+                if(confirm('Are U sure?')){
+                    var li=e.target.parentElement;
+                    axios.get("http://localhost:3000/user/get-users",config)        
+                     .then((response)=>{
+                      //  console.log(response.data.allUsers.length,'line 111')
+                         for(var i=0;i<response.data.allUsers.length;i++){
+                            console.log(li.innerHTML.indexOf(response.data.allUsers[i].email),'lin 113');
+                            if(li.innerHTML.indexOf(response.data.allUsers[i].email)!=-1){
+                               // console.log(`${response.data.allUsers[i].id}`);
+                                axios.delete(`http://localhost:3000/user/delete-user/${response.data.allUsers[i].id}`,config)
+                                .then()
+                                .catch(err=>console.log(err))
+                               }
+
+                         }
+                    })
+                    .catch((error)=>{
+                        console.log(error);
+                    })
+
+                    //localStorage.removeItem(Obj.description);
+                    itemlist.removeChild(li)
+                }
+            }
+        }
+        document.addEventListener('click',edititem);
+
+        function edititem(e){
+            if(e.target==edibtn){
+                var li=e.target.parentElement;
+                axios.get("https://crudcrud.com/api/c23bf2219105409298af11277179fc2a/appoinmentData")
+                    .then((response)=>{
+                        console.log(response)
+                         for(var i=0;i<response.data.length;i++){
+                            if(li.innerHTML.indexOf(response.data[i].description)!=-1){
+                        //let myobj_deserialized1=JSON.parse(itemlist.getElementsByClassName('item')[i].firstChild.textContent);
+
+
+                        Form.querySelector('#name').value=response.data[i].name
+                        Form.querySelector('#email').value=response.data[i].email
+                        Form.querySelector('#phonenumber').value=response.data[i].phonenumber
+                        //localStorage.removeItem(Obj.description);
+                        axios.delete(`https://crudcrud.com/api/c23bf2219105409298af11277179fc2a/appoinmentData/${response.data[i]._id}`)
+                        .then()
+                        .catch(err=>console.log(err))
+                            }
+                    }
+                })
+                .catch((error)=>{
+                    console.log(error);
+                })
+
+
+            itemlist.removeChild(li)
+        }
+    }  
+}
+
+    </script>
+</body>
+
+</html>
