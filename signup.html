@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Document</title>
+</head>
+<body>
+    <form id="addform">
+        <h1>Sign up Page</h1>
+        <label for="name">Enter Your Name:</label><br>
+        <input type="text" id="name"  ><br>
+    <label for="email">Enter Your Email id:</label><br>
+    <input type="text" id="email"  ><br>
+    <label for="password"> Password:</label><br>
+    <input type="password" id="password" ><br>
+
+    <input type="submit" value="SignUp"><br>
+    <ul id="users"></ul>
+    <div id="msg">
+    </div>
+    <a href="login.html">Existing User-LogIn</a>
+    </form>
+    
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.1.2/axios.min.js"></script>
+<script>
+
+var Form=document.getElementById('addform')
+var namei=document.getElementById('name');
+var email=document.getElementById('email');
+var password=document.getElementById('password');
+var itemlist=document.getElementById('users')
+var msgrow=document.getElementById('msg')
+Form.addEventListener("submit",addItem)
+
+function addItem(e){
+
+    e.preventDefault();
+    console.log('1');
+    // if(name.value==='' || email.value==='' || password.value===''){
+    //     alert('please enter fields')
+    // }
+    // else{
+    // console.log(name.value);
+        let UserDetails={
+            name:namei.value,
+            email:email.value,
+            password:password.value
+        }
+    console.log(UserDetails);
+        axios.post("http://localhost:3000/user/signup",UserDetails)
+        .then((response)=>{
+            console.log(response.data.message);
+            var message=document.createElement('div')
+            message.classList.add('message')
+           //console.log(response,'localhost:3000/user/add-user');
+           const msgcontent=`<span class="message">${response.data.message}</span>`
+           message.innerHTML=msgcontent
+           msgrow.append(message)
+           setTimeout(()=>{
+       message.remove();
+       },2000)
+    // window.location.href="Login.html"
+    
+  
+        })
+        .catch((err)=>{
+            var message=document.createElement('div')
+            message.classList.add('message')
+            const msgcontent=`<span class="message">${err} Somethings missing</span>`
+           message.innerHTML=msgcontent
+           msgrow.append(message)
+           setTimeout(()=>{
+       message.remove();
+       },2000)
+        })
+    }
+
+</script>
+</body>
+
+</html>

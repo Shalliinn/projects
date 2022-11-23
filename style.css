@@ -1,0 +1,77 @@
+form{
+  text-align:center;  
+  border-width:0.2rem;
+  font-weight: bold;
+  width: 350px;
+  border-style:solid;
+  border-radius: 10px;
+  border-color: black;
+  margin :5rem;
+  padding: 20px;
+  background-color:antiquewhite;
+  position: relative;
+  left:500px;
+   top:2px;
+}
+#mail{
+  text-align:center
+}
+#failmail{
+  text-align: center;
+}
+#users{
+  list-style-type: none;
+}
+#category{
+  background-color:rgb(247, 231, 12);
+}
+button{
+  background-color:rgb(247, 166, 166);
+  border-style: solid;
+  border-radius: 3px;
+  border-color: black;
+}
+#pages{
+  background-color:rgb(146, 216, 241);
+}
+input[type=submit] {
+  background-color:rgb(107, 226, 107);
+}
+#users button{
+  background-color: rgb(247, 129, 129);
+}
+
+#led{
+  position: relative;
+  left:80px;
+  top:-580px;
+  color: aliceblue;
+  width: 250px;
+}
+#file{
+  position: relative;
+  left:1100px;
+  top:-1120px;
+  width:200px;
+  color: aliceblue;
+}
+.name{
+font-weight: bold;
+color: rgb(14, 13, 13);
+}
+#led h2{
+  color: rgb(238, 10, 10);
+}
+#file h2{
+  color: rgb(243, 7, 7);
+}
+.item{
+  list-style-type:circle;
+  
+}
+body{
+  background-color:skyblue;
+}
+#numbers a{
+  color: aliceblue;
+}

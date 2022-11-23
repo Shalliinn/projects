@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Document</title>
+</head>
+<body>
+    <form id="addform">
+        <h1>Expence Tracker</h1>
+
+    <label for="expence">Choose expense-amount:</label><br>
+    <input type="number" id="expence"><br>
+    <label for="description">Choose description:</label><br>
+    <input type="text" id="description"><br>
+    <label for="category">Choose a category:</label><br>
+  <select id="category" name="category">
+    <option value="rent">rent</option>
+    <option value="drinks">drinks</option>
+    <option value="food">food</option>
+    <option value="fuel">Fuel</option>
+    <option value="ticket">Ticket</option>
+  </select><br><br><br>
+    <input type="submit" value="Add expences"><br>
+    <ul id="users"></ul><br>
+    <select id="pages" name="pages">
+     
+      <option value="2">2</option>
+    <option value="4">4</option>
+    <option value="6">6</option>
+    <option value="8">8</option>
+    </select>
+    <div id='new'></div>
+    <button id="rzp-button1">Buy Premium</button>
+    <button onclick="download()" id="downloadexpense">Download File</button>
+</form>
+
+<div id="led">
+
+  <h2>Leaderboard:</h2>
+<ul id="leaderboard"></ul>
+</div>
+
+<div id="file">
+  <h2>Downloaded Files:</h2>
+  <ul id="numbers"></ul>
+</div>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+
+var Form=document.getElementById('addform')
+var expence=document.getElementById('expence');
+var description=document.getElementById('description');
+var category=document.getElementById('category');
+var userList=document.getElementById('users');
+var expList=document.getElementById('leaderboard')
+var dom=document.getElementById('file')
+var doc=document.getElementById('new')
+var select=document.getElementById('pages')
+let flag=0;
+let usrid;
+
+Form.addEventListener('submit',addUser);
+document.addEventListener('DOMContentLoaded',reload);
+const token = localStorage.getItem('token');
+function addUser(e)
+{
+    e.preventDefault();
+    let Obj={
+            expence:expence.value,
+            description:description.value,
+            category:category.value
+        }
+
+if(flag==0){
+    newUser(Obj);
+}
+else{
+   editUser(Obj)
+   flag=0;
+}
+}
+
+function reload(e){
+
+    e.preventDefault();
+     pagination(1);
+
+}
+function showonscreen1(data){
+  var name=data.name;
+var Data=data.expenes;
+if(Data.length>0){
+var newli=document.createElement('li');
+newli.className='name';
+newli.appendChild(document.createTextNode(`${name}`));
+expList.appendChild(newli)
+
+ for(var i=0;i<Data.length;i++){
+var li=document.createElement('li');
+ li.className='item';
+ li.appendChild(document.createTextNode(`${Data[i].expence}-${Data[i].description}-${Data[i].category}`));
+
+expList.appendChild(li);
+  }
+}
+}
+
+
+function showonscreen(data)
+{
+var id=data.id
+ var li=document.createElement('li');
+ li.className='item';
+ li.appendChild(document.createTextNode(`${data.expence}-${data.description}-${data.category}  `));
+
+ var deleteBtn=document.createElement('button');
+ deleteBtn.className='btn';
+ deleteBtn.appendChild(document.createTextNode('delete'));
+ li.appendChild(deleteBtn);
+
+//  var editBtn=document.createElement('button');
+//  editBtn.className='btn';
+//  editBtn.appendChild(document.createTextNode('edit'));
+//  li.appendChild(editBtn);
+
+userList.appendChild(li);
+userList.addEventListener('click',deleteuser);
+function deleteuser(e)
+{
+    if(e.target==deleteBtn)
+    {
+
+        let li=e.target.parentElement;
+        deletee(li,id);
+        userList.removeChild(li);
+    }
+}
+// userList.addEventListener('click',edituser);
+
+// function deleteuser(e)
+// {
+//     if(e.target==deleteBtn)
+//     {
+
+//         let li=e.target.parentElement;
+//         deletee(li);
+//         userList.removeChild(li);
+//     }
+ }
+
+// function edituser(e)
+//  {
+//     if(e.target==editBtn)
+//     {
+//       let li=e.target.parentElement;
+//       flag=1;
+//       edit(li);
+//       userList.removeChild(li);
+//     }
+//  }
+// }
+
+select.addEventListener('click',values)
+
+function values(e){
+  e.preventDefault;
+  var option = select.options[select.selectedIndex]
+  var selectedValue=option.value;
+  console.log(selectedValue,'158');
+ // var exp_per_page=select.value;
+localStorage.setItem('exp_per_page',selectedValue)
+}
+exp_per_page=localStorage.getItem('exp_per_page')||2
+
+
+    async function newUser(Obj)
+     {
+      const token=localStorage.getItem('token')
+       let data=await axios.post("http://localhost:3000/add-expense",Obj,{headers:{'Authorization':token}})
+       showonscreen(Obj);
+     }
+
+    async function editUser(Obj)
+     {
+        let data2=await axios.post(`http://localhost:3000/edit-expense/${usrid}`,Obj)
+        showonscreen(Obj);
+     }
+
+     function buttonp(page,totalexp,lastpage){
+      for(let i=1;i<=lastpage;i++){
+      var c=document.createElement('button')
+     c.className='page'
+      c.appendChild(document.createTextNode(`${i}`))
+//console.log(c,'219');
+      doc.appendChild(c)
+      c.addEventListener('click',page)
+  function page(e){
+      e.preventDefault();
+      userList.innerHTML='';
+      console.log(i);
+     axios.get(`http://localhost:3000/get-expense/${exp_per_page}/?page=${i}`,{headers:{'Authorization':token}}).then((response)=>{
+      response = Object.freeze(response);  //add this line before your console.log
+        console.log(response.data,'237');
+        for(var j=0;j<response.data.expense.length;j++){
+              showonscreen(response.data.expense[j])
+            }
+     })
+    }
+     }
+     }
+function button(page,totalexp,lastpage){
+  for(let i=1;i<=lastpage;i++){
+      var c=document.createElement('button')
+     c.className='page'
+      c.appendChild(document.createTextNode(`${i}`))
+//console.log(c,'219');
+      doc.appendChild(c)
+      c.addEventListener('click',page)
+  function page(e){
+      e.preventDefault();
+      userList.innerHTML='';
+      //doc.innerHTML='';
+      console.log(i);
+     axios.get(`http://localhost:3000/get-expense/${exp_per_page}/?page=${i}`,{headers:{'Authorization':token}}).then((response)=>{
+      response = Object.freeze(response);  //add this line before your console.log
+        console.log(response.data.user,'237');
+       for(let j=0;j<response.data.user.length;j++){
+        showonscreen(response.data.user[j])
+       }
+     })
+
+    }
+
+
+     }
+}
+// var button=document.getElementsByClassName('page')
+// for(var i=0;i<button.length;i++){
+// c.addEventListener('click',function(){
+//           pagination(i+1)
+//            } )
+//           }
+
+    async function pagination(id){
+      userList.innerHTML=''
+      doc.innerHTML=''
+      const token=localStorage.getItem('token')
+        let response=await axios.get(`http://localhost:3000/get-expense/${exp_per_page}/?page=${id}`,{headers:{'Authorization':token}});
+      console.log(response,'174');
+
+   // console.log(response.data.name,'146');
+ if(response.data.ispremiumuser){
+        const User=response.data.user;
+        console.log(User);
+
+
+        // if(response.data.name==User[i].name){
+
+  //  for(j=0;j<User[i].expenes.length;j++){
+  const page=+response.data.page;
+      console.log(page,'222');
+      // var haspreviouspage=page>1;
+      // var previouspage=page-1;
+      // var nextpage=page+1;
+      var totalexp=response.data.total;
+      console.log(totalexp,'227');
+      var lastpage=Math.ceil(totalexp/response.data.Expense_Per_Page)
+      console.log(lastpage,'229');
+
+buttonp(page,totalexp,lastpage)
+       
+
+      //   }
+      // }
+      for(var i=0;i<User.length;i++){
+      console.log(User[i]);
+      showonscreen1(User[i])
+        }
+        for(var k=0;k<response.data.expense.length;k++){
+              showonscreen(response.data.expense[k])
+            }
+
+        }
+        else{
+          const page=+response.data.page;
+          //console.log(page,response,'235');
+      var totalexp=response.data.total;
+     // console.log(response.data.Expense_Per_Page);
+  var lastpage=Math.ceil(totalexp/response.data.Expense_Per_Page)
+    //  console.log(lastpage,'217');
+   button(page,totalexp,lastpage)
+   console.log(response.data.expense,'232');
+     for(let j=0;j<response.data.user.length;j++){
+        showonscreen(response.data.user[j])
+       }
+      }
+showfile(response.data)
+
+     }
+
+
+function download(){
+    axios.get('http://localhost:3000/download', { headers: {"Authorization" : token} })
+    .then((response) => {
+      console.log(response.data,'182');
+        if(response.status === 200){
+            //the bcakend is essentially sending a download link
+            //  which if we open in browser, the file would download
+           var a = document.createElement("a");
+            a.href = response.data.fileUrl;
+            a.download = 'myexpense.csv';
+            a.click();
+
+        } else {
+            throw new Error(response.data.message)
+        }
+
+    })
+    .catch((err) => {
+        console.log(err)
+    });
+  }
+
+function showfile(Data){
+const files=Data.file;
+var ul=document.getElementById('numbers')
+    ul.innerHTML='';
+    for(var j=0;j<files.length;j++){
+let b= document.createElement('a');
+let li=document.createElement('li')
+b.href=files[j].fileUrl;
+b.innerHTML=`file-${j}`
+li.appendChild(b)
+ul.appendChild(li)
+    }
+    dom.appendChild(ul)
+  }
+
+
+
+
+
+    async function deletee(li,id)
+     {try{
+      console.log(id,'342');
+      const token=localStorage.getItem('token')
+            let response =   await axios.delete(`http://localhost:3000/delete-expense/${id}`,{headers:{'Authorization':token}})
+            console.log(response);
+     }
+     catch{
+      throw new Error(response.data)
+     }
+            }
+     
+    
+    
+
+    // async function edit(li)
+    //   {
+    //     let response=await axios.get("http://localhost:3000/get-expense")
+
+    //  for(var i=0;i<response.data.Allexp.length;i++){
+    //     if(li.innerHTML.indexOf(response.data.Allexp[i].description)!=-1){
+    //          Form.querySelector('#expence').value=response.data.Allexp[i].expence
+    //          Form.querySelector('#description').value=response.data.Allexp[i].description
+    //          Form.querySelector('#category').value=response.data.Allexp[i].category;
+    //          usrid= response.data.Allexp[i].id
+    //             }
+    //         }
+    //   }
+
+
+document.getElementById('rzp-button1').onclick = async function (e) {
+  e.preventDefault();
+   const response  = await axios.get('http://localhost:3000/purchase/premiummembership', { headers: {"Authorization" : token} });
+    console.log(response);
+    var options =
+    {
+     "key": response.data.key_id, // Enter the Key ID generated from the Dashboard
+     "name": "Test Company",
+     "order_id": response.data.order.id, // For one time payment
+     "prefill": {
+       "name": "Test User",
+       "email": "test.user@example.com",
+       "contact": "7003442036"
+     },
+     "theme": {
+      "color": "#3399cc"
+     },
+     // This handler function will handle the success payment
+     "handler": function (response) {
+         console.log(response);
+         axios.post('http://localhost:3000/purchase/updatetransactionstatus',{
+             order_id: options.order_id,
+             payment_id: response.razorpay_payment_id,
+         }, { headers: {"Authorization" : token} }).then(() => {
+             alert('You are a Premium User Now')
+
+         }).catch(() => {
+             alert('Something went wrong. Try Again!!!')
+
+         })
+     },
+  };
+  const rzp1 = new Razorpay(options);
+  rzp1.open();
+
+
+  rzp1.on('payment.failed', function (response){
+  alert(response.error.code);
+  alert(response.error.description);
+  alert(response.error.source);
+  alert(response.error.step);
+  alert(response.error.reason);
+  alert(response.error.metadata.order_id);
+  alert(response.error.metadata.payment_id);
+ });
+}
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.1.2/axios.min.js" ></script>
+
+</body>
+</html>

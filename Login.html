@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Document</title>
+</head>
+<body>
+    <form id="addform">
+        <h1>Log In page</h1>
+    <label for="email">Enter Your Email id:</label><br>
+    <input type="text" id="email"  ><br>
+    <label for="password"> Password:</label><br>
+    <input type="password" id="password" ><br>
+
+    <input type="submit" value="Login"><br><br>
+    
+
+    <ul id="users"></ul>
+    <button id="forgot" onclick="location='forgot.html'">forgot Password</button>
+
+    <div id="msg">
+        <a href="signup.html">New User-Signup</a>
+    </div>
+    </form>
+   
+
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.1.2/axios.min.js"></script>
+<script>
+    var Form=document.getElementById('addform')
+var email=document.getElementById('email');
+var password=document.getElementById('password');
+var itemlist=document.getElementById('users')
+var msgrow=document.getElementById('msg')
+Form.addEventListener("submit",addItem)
+
+function addItem(e){
+    e.preventDefault();
+    let UserDetails={
+            email:email.value,
+            password:password.value
+        }
+        axios.post("http://localhost:3000/user/login",UserDetails)
+        .then((response)=>{
+            console.log(response,'43');
+            alert(response.data.message)
+            localStorage.setItem('token',response.data.token)
+            window.location.href="expence.html"
+        })
+        .catch((err)=>{
+            var message=document.createElement('div')
+            message.classList.add('message')
+            console.log(err.response.request.status);
+        if(err.response.request.status=="404"){
+            var y=' User not found '
+        }
+        else if(err.response.request.status=="401"){
+            var y="password is incorrect"
+        }
+        else{
+            var y="Somethings missing"
+        }
+        const msgcontent=`<span class="message">${err}${y} </span>`
+           message.innerHTML=msgcontent
+           msgrow.append(message)
+           setTimeout(()=>{
+       message.remove();
+       },2000)
+        })
+    }
+
+    </script>
+</body>
+
+</html>
